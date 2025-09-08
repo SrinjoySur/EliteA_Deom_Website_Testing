@@ -1,24 +1,29 @@
 const { test, expect } = require('@playwright/test');
-const { PasswordResetPage } = require('../page_objects/PasswordResetPage');
-const { HomePage } = require('../page_objects/HomePage');
+const HomePage = require('../pages/HomePage');
+const PasswordResetPage = require('../pages/PasswordResetPage');
 
-const passwordResetPage = new PasswordResetPage();
-const homePage = new HomePage();
+test.describe('Password Reset', () => {
+  test('Successful Password Reset', async ({ page }) => {
+    const homePage = new HomePage(page);
+    const passwordResetPage = new PasswordResetPage(page);
 
-// Test for successful password reset
+    await homePage.navigate();
+    await homePage.clickLogin();
+    await page.click('text=Forgot Password');
 
- test('Successful password reset', async ({ page }) => {
-  await homePage.navigateToPasswordResetPage(page);
-  await passwordResetPage.resetPassword(page, 'john.doe@example.com');
-  const confirmationMessage = await passwordResetPage.getConfirmationMessage(page);
-  expect(confirmationMessage).toBe('Password reset email sent successfully!');
-});
+    await passwordResetPage.resetPassword('john.doe@mail.com');
+    await expect(page.locator('text=Password reset email sent')).toBeVisible();
+  });
 
-// Test for password reset with unregistered email
+  test('Password Reset with Non-Existent Email', async ({ page }) => {
+    const homePage = new HomePage(page);
+    const passwordResetPage = new PasswordResetPage(page);
 
- test('Password reset with unregistered email', async ({ page }) => {
-  await homePage.navigateToPasswordResetPage(page);
-  await passwordResetPage.resetPassword(page, 'unregistered@example.com');
-  const errorMessage = await passwordResetPage.getErrorMessage(page);
-  expect(errorMessage).toBe('Email not registered');
+    await homePage.navigate();
+    await homePage.clickLogin();
+    await page.click('text=Forgot Password');
+
+    await passwordResetPage.resetPassword('non.existent@mail.com');
+    await expect(page.locator('text=Email not found')).toBeVisible();
+  });
 });
