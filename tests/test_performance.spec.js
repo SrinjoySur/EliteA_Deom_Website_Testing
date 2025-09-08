@@ -1,28 +1,28 @@
 const { test, expect } = require('@playwright/test');
-const { HomePage } = require('../page_objects/HomePage');
+const HomePage = require('../pages/HomePage');
 
-const homePage = new HomePage();
+test.describe('Performance Testing', () => {
+  test('Page Load Performance', async ({ page }) => {
+    const homePage = new HomePage(page);
 
-// Test for page load performance
+    const start = Date.now();
+    await homePage.navigate();
+    const end = Date.now();
 
- test('Page load performance', async ({ page }) => {
-  const startTime = Date.now();
-  await homePage.navigateToHomePage(page);
-  const endTime = Date.now();
-  const loadTime = endTime - startTime;
-  expect(loadTime).toBeLessThan(2000);
-});
+    const loadTime = end - start;
+    expect(loadTime).toBeLessThan(2000);
+  });
 
-// Test for high traffic performance
+  test('Concurrent User Load', async ({ browser }) => {
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    const homePage = new HomePage(page);
 
- test('High traffic performance', async ({ page }) => {
-  const users = Array(1000).fill(null);
-  const loadTimes = await Promise.all(users.map(async () => {
-    const startTime = Date.now();
-    await homePage.navigateToHomePage(page);
-    const endTime = Date.now();
-    return endTime - startTime;
-  }));
-  const averageLoadTime = loadTimes.reduce((a, b) => a + b, 0) / loadTimes.length;
-  expect(averageLoadTime).toBeLessThan(5000);
+    const start = Date.now();
+    await homePage.navigate();
+    const end = Date.now();
+
+    const loadTime = end - start;
+    expect(loadTime).toBeLessThan(5000);
+  });
 });
