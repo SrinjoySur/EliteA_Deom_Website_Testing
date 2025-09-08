@@ -1,33 +1,38 @@
 const { test, expect } = require('@playwright/test');
-const { LoginPage } = require('../page_objects/LoginPage');
-const { HomePage } = require('../page_objects/HomePage');
+const HomePage = require('../pages/HomePage');
+const LoginPage = require('../pages/LoginPage');
 
-const loginPage = new LoginPage();
-const homePage = new HomePage();
+test.describe('User Login', () => {
+  test('Successful User Login', async ({ page }) => {
+    const homePage = new HomePage(page);
+    const loginPage = new LoginPage(page);
 
-// Test for successful user login
+    await homePage.navigate();
+    await homePage.clickLogin();
 
- test('Successful user login', async ({ page }) => {
-  await homePage.navigateToLoginPage(page);
-  await loginPage.loginUser(page, 'john.doe@example.com', 'Password123');
-  const dashboard = await loginPage.getDashboard(page);
-  expect(dashboard).toBeVisible();
-});
+    await loginPage.login('john.doe@mail.com', 'Password123');
+    await expect(page).toHaveURL('/dashboard');
+  });
 
-// Test for login with incorrect password
+  test('Login with Incorrect Password', async ({ page }) => {
+    const homePage = new HomePage(page);
+    const loginPage = new LoginPage(page);
 
- test('Login with incorrect password', async ({ page }) => {
-  await homePage.navigateToLoginPage(page);
-  await loginPage.loginUser(page, 'john.doe@example.com', 'WrongPassword');
-  const errorMessage = await loginPage.getErrorMessage(page);
-  expect(errorMessage).toBe('Incorrect password');
-});
+    await homePage.navigate();
+    await homePage.clickLogin();
 
-// Test for login with unregistered email
+    await loginPage.login('john.doe@mail.com', 'WrongPassword');
+    await expect(page.locator('text=Incorrect password')).toBeVisible();
+  });
 
- test('Login with unregistered email', async ({ page }) => {
-  await homePage.navigateToLoginPage(page);
-  await loginPage.loginUser(page, 'unregistered@example.com', 'Password123');
-  const errorMessage = await loginPage.getErrorMessage(page);
-  expect(errorMessage).toBe('Email not registered');
+  test('Login with Non-Existent Email', async ({ page }) => {
+    const homePage = new HomePage(page);
+    const loginPage = new LoginPage(page);
+
+    await homePage.navigate();
+    await homePage.clickLogin();
+
+    await loginPage.login('non.existent@mail.com', 'Password123');
+    await expect(page.locator('text=Email not found')).toBeVisible();
+  });
 });
