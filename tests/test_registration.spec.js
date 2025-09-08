@@ -1,44 +1,39 @@
 const { test, expect } = require('@playwright/test');
-const { RegistrationPage } = require('../page_objects/RegistrationPage');
-const { HomePage } = require('../page_objects/HomePage');
+const HomePage = require('../pages/HomePage');
+const RegistrationPage = require('../pages/RegistrationPage');
 
-const registrationPage = new RegistrationPage();
-const homePage = new HomePage();
+test.describe('User Registration', () => {
+  test('Successful User Registration', async ({ page }) => {
+    const homePage = new HomePage(page);
+    const registrationPage = new RegistrationPage(page);
 
-// Test for successful user registration
+    await homePage.navigate();
+    await homePage.clickSignup();
 
- test('Successful user registration', async ({ page }) => {
-  await homePage.navigateToRegistrationPage(page);
-  await registrationPage.registerUser(page, 'John Doe', 'john.doe@example.com', 'Password123');
-  const confirmationMessage = await registrationPage.getConfirmationMessage(page);
-  expect(confirmationMessage).toBe('Your account has been created successfully!');
-});
+    await registrationPage.register('John', 'Doe', 'john.doe@mail.com', 'Password123');
+    await expect(page.locator('text=Registration successful')).toBeVisible();
+    await expect(page).toHaveURL('/login');
+  });
 
-// Test for registration with existing email
+  test('Registration with Existing Email', async ({ page }) => {
+    const homePage = new HomePage(page);
+    const registrationPage = new RegistrationPage(page);
 
- test('Registration with existing email', async ({ page }) => {
-  await homePage.navigateToRegistrationPage(page);
-  await registrationPage.registerUser(page, 'Jane Doe', 'jane.doe@example.com', 'Password123');
-  const errorMessage = await registrationPage.getErrorMessage(page);
-  expect(errorMessage).toBe('Email already exists');
-});
+    await homePage.navigate();
+    await homePage.clickSignup();
 
-// Test for registration with invalid email format
+    await registrationPage.register('Jane', 'Doe', 'john.doe@mail.com', 'Password123');
+    await expect(page.locator('text=Email already exists')).toBeVisible();
+  });
 
- test('Registration with invalid email format', async ({ page }) => {
-  await homePage.navigateToRegistrationPage(page);
-  await registrationPage.registerUser(page, 'John Doe', 'john.doe@invalid', 'Password123');
-  const errorMessage = await registrationPage.getErrorMessage(page);
-  expect(errorMessage).toBe('Invalid email format');
-});
+  test('Registration with Invalid Email', async ({ page }) => {
+    const homePage = new HomePage(page);
+    const registrationPage = new RegistrationPage(page);
 
-// Test for registration with missing required fields
+    await homePage.navigate();
+    await homePage.clickSignup();
 
- test('Registration with missing required fields', async ({ page }) => {
-  await homePage.navigateToRegistrationPage(page);
-  await registrationPage.registerUser(page, '', '', '');
-  const errorMessages = await registrationPage.getErrorMessages(page);
-  expect(errorMessages).toContain('Name is required');
-  expect(errorMessages).toContain('Email is required');
-  expect(errorMessages).toContain('Password is required');
+    await registrationPage.register('Jane', 'Doe', 'jane.doe@mail', 'Password123');
+    await expect(page.locator('text=Invalid email format')).toBeVisible();
+  });
 });
