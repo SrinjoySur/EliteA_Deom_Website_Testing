@@ -1,28 +1,41 @@
 const { Given, When, Then } = require('@cucumber/cucumber');
 const { expect } = require('@playwright/test');
-const HomePage = require('../pages/HomePage');
-const LoginPage = require('../pages/LoginPage');
+const { RegistrationPage, HomePage, LoginPage, ProductPage, CartPage, CheckoutPage } = require('../pages');
 
-Given('I navigate to the home page', async function () {
-  this.homePage = new HomePage(this.page);
-  await this.homePage.navigate('https://automationexercise.com/');
+Given('the user is on the registration page', async function () {
+  await RegistrationPage.goto();
 });
 
-Then('I should see the title {string}', async function (expectedTitle) {
-  const isTitleCorrect = await this.homePage.verifyTitle(expectedTitle);
-  expect(isTitleCorrect).toBe(true);
+When('the user enters valid registration details', async function () {
+  await RegistrationPage.enterDetails({ username: 'testuser', email: 'test@example.com', password: 'Password123!' });
 });
 
-Given('I navigate to the login page', async function () {
-  this.loginPage = new LoginPage(this.page);
-  await this.loginPage.navigate('https://automationexercise.com/login');
+When('the user submits the registration form', async function () {
+  await RegistrationPage.submit();
 });
 
-When('I enter username {string} and password {string}', async function (username, password) {
-  await this.loginPage.login(username, password);
+Then('the user should see a registration success message', async function () {
+  const message = await RegistrationPage.getSuccessMessage();
+  expect(message).toBe('Registration successful');
 });
 
-Then('I should see the message {string}', async function (expectedMessage) {
-  const message = await this.loginPage.getLoginMessage();
-  expect(message).toBe(expectedMessage);
+// Add more step definitions for other scenarios...
+
+Given('the user is on the homepage', async function () {
+  await HomePage.goto();
 });
+
+When('the user enters a valid product name in the search bar', async function () {
+  await HomePage.enterSearch('product name');
+});
+
+When('the user clicks the search button', async function () {
+  await HomePage.clickSearch();
+});
+
+Then('the user should see the search results for the product', async function () {
+  const results = await HomePage.getSearchResults();
+  expect(results).toContain('product name');
+});
+
+// Add more step definitions for other scenarios...
