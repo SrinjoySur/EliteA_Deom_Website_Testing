@@ -1,0 +1,1 @@
+Feature: View Products\n\n  Scenario: User views the list of products\n    Given the user is on the home page\n    When the user navigates to the products section\n    Then the user should see a list of available products
