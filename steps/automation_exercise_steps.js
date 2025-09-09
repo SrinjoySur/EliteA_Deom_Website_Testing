@@ -1,5 +1,35 @@
 const { Given, When, Then } = require('@cucumber/cucumber');
 const { expect } = require('@playwright/test');
+
+Given('the user is on the registration page', async function () {
+  await this.page.goto('https://automationexercise.com/signup');
+});
+
+When('the user enters valid details and submits the form', async function () {
+  await this.page.fill('input[name="name"]', 'Test User');
+  await this.page.fill('input[name="email"]', 'testuser@example.com');
+  await this.page.click('button[type="submit"]');
+});
+
+Then('the user should be registered successfully', async function () {
+  await this.page.waitForSelector('text=Account Created!');
+  expect(await this.page.isVisible('text=Account Created!')).toBe(true);
+});
+
+Given('the user is on the login page', async function () {
+  await this.page.goto('https://automationexercise.com/login');
+});
+
+When('the user enters valid credentials and submits the form', async function () {
+  await this.page.fill('input[name="email"]', 'testuser@example.com');
+  await this.page.fill('input[name="password"]', 'password123');
+  await this.page.click('button[type="submit"]');
+});
+
+Then('the user should be logged in successfully', async function () {
+  await this.page.waitForSelector('text=Logged in as Test User');
+  expect(await this.page.isVisible('text=Logged in as Test User')).toBe(true);
+});
 const HomePage = require('../pages/HomePage');
 const LoginPage = require('../pages/LoginPage');
 
