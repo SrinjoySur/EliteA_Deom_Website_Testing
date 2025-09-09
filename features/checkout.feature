@@ -1,0 +1,1 @@
+Feature: Checkout\n\n  Scenario: User completes checkout with valid payment\n    Given the user has products in the
